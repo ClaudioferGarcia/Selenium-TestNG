@@ -3,8 +3,6 @@ package pages;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
-import helpers.Helpers;
-
 public class PageLogin {
 	
 	private WebDriver driver;
@@ -24,8 +22,5 @@ public class PageLogin {
 		driver.findElement(userField).sendKeys(user);
 	    driver.findElement(passField).sendKeys(pass);
 	    driver.findElement(loginButton).click();
-	    
-	    Helpers helpers = new Helpers();
-	    helpers.sleepSecunds(5);
 	}
 }
