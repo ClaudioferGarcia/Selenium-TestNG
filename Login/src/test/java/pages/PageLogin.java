@@ -1,26 +1,33 @@
 package pages;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
 
 public class PageLogin {
 	
-	private WebDriver driver;
-	private By userField;
-	private By passField;
-	private By loginButton;
+	@FindBy(xpath ="//input[@id='user-name']")
+	private WebElement userField;
+	
+	@FindBy(xpath ="//input[@id='password']")
+	private WebElement passField;
+	
+	@FindBy(xpath ="//input[@id='login-button']")
+	private WebElement btnLogin;
+	
 	
 	public PageLogin(WebDriver driver) {
-		this.driver= driver;
-		userField = By.cssSelector("#user-name");
-		passField = By.cssSelector("#password");
-		loginButton = By.cssSelector("#login-button");
+		PageFactory.initElements(driver, this);
 	}
 	
 	public void login(String user, String pass) {
-		
-		driver.findElement(userField).sendKeys(user);
-	    driver.findElement(passField).sendKeys(pass);
-	    driver.findElement(loginButton).click();
+		userField.sendKeys(user);
+		passField.sendKeys(pass);
 	}
+	
+	public void clickLogin() {
+		btnLogin.click();
+	}
+	
 }

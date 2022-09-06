@@ -1,7 +1,9 @@
-package TestLogin;
+package testLogin;
 
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+
 import java.io.IOException;
 import java.time.Duration;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -10,11 +12,11 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
-import Utilities.CaptureEvidence;
 import pages.PageLogin;
-import pages.PageLogon;
-import pages.PageProducts;
+import utilities.CaptureEvidence;
+import utilities.DatosExcel;
 
 public class Login {
 	
@@ -38,40 +40,50 @@ public class Login {
 	     wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#login-button")));     
 	}
 	
-	@Test(priority = 0)
-	public void loginOk() throws InvalidFormatException, IOException, InterruptedException {
-		
-		CaptureEvidence.writeTitle(evidenceRoute + documentName, "Documento de Evidencias", 20);
-		CaptureEvidence.takeAScreenshot(driver, evidenceRoute + temporaryNameImg , evidenceRoute + documentName, "Login");
+	@Test(dataProvider = "Datos Login Excel")
+	public void loginOk(String user, String pass) throws InvalidFormatException, IOException, InterruptedException {
 		
 		PageLogin pageLogin = new PageLogin(driver);
-		PageProducts pageProducts = new PageProducts(driver);
-		pageLogin.login("standard_user", "secret_sauce");
+		pageLogin.login(user, pass);
+		pageLogin.clickLogin();
 		
-	    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-	    wait.until(ExpectedConditions.
-	    elementToBeClickable(By.cssSelector("div.page_wrapper div:nth-child(1) div.header_container:nth-child(1) "
-	    		+ "div.header_secondary_container > span.title")));
-	    
-	    CaptureEvidence.takeAScreenshot(driver, evidenceRoute + temporaryNameImg , evidenceRoute + documentName, "Logueado Ok");
-	    
-	    pageProducts.assertLoginProducts();
+		String expectedUrl = "https://www.saucedemo.com/inventory.html";
+		
+		try { // Caso Negativo
+			
+			Assert.assertFalse(driver.findElement(By.tagName("h3")).getTagName().isEmpty());
+			CaptureEvidence.writeTitle(evidenceRoute + documentName, "Documento de Evidencias", 20);
+			CaptureEvidence.takeAScreenshot(driver, evidenceRoute + temporaryNameImg , evidenceRoute + documentName, "Login No Ok");
+			
+		} catch (Exception e) {
+			// Caso Positivo
+			Assert.assertEquals(driver.getCurrentUrl(), expectedUrl);
+		}
 	}
 	
-	@Test(priority = 1)
-	public void loginNoOK() throws InvalidFormatException, IOException, InterruptedException {
-		
-		PageLogin pageLogin = new PageLogin(driver);
-		PageLogon pageLogon = new PageLogon(driver);
-		pageLogin.login("user", "sauce");
-		
-		CaptureEvidence.takeAScreenshot(driver, evidenceRoute + temporaryNameImg , evidenceRoute + documentName, "Login NO OK");
-		
-		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(2));
-	    wait.until(ExpectedConditions.elementToBeClickable(By.tagName("h3"))); 
-	    
-		pageLogon.assertLogonPage();   
+	@DataProvider(name = "Datos Login Excel")
+	public Object[][] userDataExcel() throws Exception{
+		return DatosExcel.leerExcel("..\\Login\\UserData\\DataProviderExcel24Ago2022.xlsx", "Hoja1");
 	}
+	
+	/*@DataProvider(name = "Datos Login Ok")
+	public Object[][] userData() {
+		Object data[][] = new Object[4][2];
+		
+		data[0][0] = "standard_user";
+		data[0][1] = "secret_sauce";
+		
+		data[1][0] = "locked_out_user";
+		data[1][1] = "secret_sauce";
+		
+		data[2][0] = "problem_user";
+		data[2][1] = "secret_sauce";
+		
+		data[3][0] = "performance_glitch_user";
+		data[3][1] = "secret_sauce";
+		
+		return data;
+	}*/
 	
 	@AfterMethod
 	public void closePage(){
